@@ -1,0 +1,92 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Users {
+  id Int @id @default(autoincrement())
+  name String
+  email String @unique
+  password String 
+  cpf String @unique
+  photo String
+  score Int @default(0)
+
+  Posts Posts[]
+  courier Chat[] @relation("courier")
+  buyer Chat[] @relation("buyer")
+  user ScoreHistory[] @relation("user")
+  evaluator ScoreHistory[] @relation("evaluator")
+  
+  @@map("users")
+}
+
+model Posts {
+  id Int @id @default(autoincrement())
+  userId Int
+  title String
+  description String
+  categoryName String 
+  budget Int 
+  travelAddress String 
+  arrivalDay String
+  departureDay String
+
+  user  Users @relation(fields: [userId], references: [id])
+  category Category @relation(fields: [categoryName], references: [name])
+
+  @@map("posts")
+}
+
+model Category {
+  id Int @id @default(autoincrement())
+  name String @unique
+
+  Posts Posts[]
+
+  @@map("category")
+}
+
+model Chat {
+  id Int @id @default(autoincrement())
+  courierId Int
+  buyerId Int
+  timeOfMessage String? 
+  lastMessage String?
+
+  courier  Users @relation("courier", fields: [courierId], references: [id])
+  buyer  Users @relation("buyer", fields: [buyerId], references: [id])
+  @@map("chat")
+}
+
+model Messages {
+  id Int @id @default(autoincrement())
+  chatId Int
+  writerId Int
+  destinyId Int
+  message String
+  timeOfMessage String
+
+
+  
+  @@map("messages")
+}
+
+model ScoreHistory {
+  id Int @id @default(autoincrement())
+  userId Int
+  evaluatorId Int
+  score Int
+
+  user  Users @relation("user", fields: [userId], references: [id])
+  evaluator  Users @relation("evaluator", fields: [evaluatorId], references: [id])
+
+  @@map("scoreHistory")
+}
